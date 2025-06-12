@@ -1,0 +1,58 @@
+BootStrap: docker  
+From: ubuntu:24.04
+
+%labels
+    Maintainer "rx"
+    Version "1.0"
+    Description "Singularity image for cellxgene_VIP"
+
+%post
+    # 1. Install system tools, build toolchain, and packaging utilities
+    apt-get update && apt-get install -y --no-install-recommends \
+        wget \
+        bzip2 \
+        ca-certificates \
+        git \
+        build-essential \
+        cpio \
+        pkg-config \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+    # 2. Install Miniconda
+    wget -qO /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    bash /tmp/miniconda.sh -b -p /opt/miniconda && rm /tmp/miniconda.sh
+    export PATH="/opt/miniconda/bin:$PATH"
+    conda config --system --set auto_activate_base false
+
+    # 3. Clone and run the VIPlight installer
+    git clone https://github.com/interactivereport/cellxgene_VIP.git /opt/cellxgene_VIP
+    cd /opt/cellxgene_VIP
+    chmod +x install_VIPlight.sh
+    mkdir -p /opt/VIPenv
+    ./install_VIPlight.sh /opt/VIPenv
+
+    # 4. Clean up Conda caches
+    conda clean -afy
+
+%environment
+    # Ensure the VIPlight and cellxgene_VIP/VIPlight environment is in PATH
+    export PATH="/opt/VIPenv/bin:$PATH"
+    export PATH="/opt/cellxgene_VIP:$PATH"
+    export LC_ALL=C
+
+%runscript
+#!/bin/sh
+# -------------------------------
+# Run Cellxgene VIP (VIPlight)
+# -------------------------------
+
+    if [ $# -lt 1 ]; then
+        echo "Usage: singularity run <image.sif> <dataset.h5ad> [--host 0.0.0.0] [--port 5005]"
+        exit 1
+    fi
+    # Source the environment activation and launch
+    source /opt/VIPenv/bin/activate
+
+# Call the VIPlight script in the repo dir
+    exec /opt/cellxgene_VIP/VIPlight "$@"
+

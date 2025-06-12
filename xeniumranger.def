@@ -1,0 +1,43 @@
+Bootstrap: docker
+From: ubuntu:24.04
+
+%files
+    xeniumranger-3.1.1.tar.xz /opt/
+
+%labels
+    Rui Xiao
+    Container for Xenium Ranger 3.1.1
+
+
+%post
+    # Install esential packages
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        tar \
+        xz-utils \
+        ca-certificates \
+        libgl1 \
+        libglib2.0-0 \
+        libgtk-3-0 \
+        libnss3 \
+        libx11-xcb1 \
+        libxcb-dri3-0 \
+        libdrm2 \
+        libgbm1 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxfixes3 \
+        libxrandr2 \
+        libxtst6
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Extract Xenium Ranger
+    cd /opt
+    tar -xvf xeniumranger-3.1.1.tar.xz
+    rm xeniumranger-3.1.1.tar.xz
+    
+
+%environment
+    export PATH="/opt/xeniumranger-xenium3.1/bin:$PATH"
+
