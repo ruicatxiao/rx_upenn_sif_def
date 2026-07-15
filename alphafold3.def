@@ -26,8 +26,8 @@ apt update --quiet \
 # Get apt repository of specific Python versions. Then install Python. Tell APT
 # this isn't an interactive TTY to avoid timezone prompt when installing.
 add-apt-repository ppa:deadsnakes/ppa \
-&& DEBIAN_FRONTEND=noninteractive apt install --yes --quiet python3.11 python3-pip python3.11-venv python3.11-dev
-python3.11 -m venv /alphafold3_venv
+&& DEBIAN_FRONTEND=noninteractive apt install --yes --quiet python3.12 python3-pip python3.12-venv python3.12-dev
+python3.12 -m venv /alphafold3_venv
 PATH="/hmmer/bin:/alphafold3_venv/bin:$PATH"
 
 # Install HMMER. Do so before copying the source code, so that docker can cache
@@ -47,8 +47,7 @@ mkdir -p /app/alphafold
 cd /app/alphafold
 
 # Install the Python dependencies AlphaFold 3 needs.
-pip3 install -r dev-requirements.txt
-pip3 install --no-deps .
+pip3 install .
 # Build chemical components database (this binary was installed by pip).
 build_data
 
